@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Pattern Detective 🔍</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 20px;
+
+    font-family: Arial, sans-serif;
+
+    background: linear-gradient(135deg, #24112f, #5b3475);
+
+    color: white;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game {
+    width: min(700px, 100%);
+
+    text-align: center;
+
+    background: rgba(255,255,255,0.08);
+
+    padding: 28px;
+
+    border-radius: 25px;
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.35);
+}
+
+h1 {
+    margin: 0 0 5px;
+
+    font-size: 40px;
+}
+
+.subtitle {
+    opacity: 0.8;
+
+    margin-bottom: 20px;
+}
+
+.stats {
+    display: flex;
+
+    justify-content: space-around;
+
+    gap: 10px;
+
+    margin: 15px 0;
+}
+
+.stat {
+    background: rgba(255,255,255,0.1);
+
+    padding: 10px 15px;
+
+    border-radius: 14px;
+
+    min-width: 100px;
+}
+
+.stat b {
+    display: block;
+
+    font-size: 22px;
+
+    margin-top: 4px;
+}
+
+#message {
+    min-height: 30px;
+
+    font-weight: bold;
+
+    margin: 15px;
+}
+
+#pattern {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    min-height: 100px;
+
+    margin: 25px auto;
+
+    max-width: 600px;
+}
+
+.shape {
+
+    width: 55px;
+
+    height: 55px;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: 38px;
+}
+
+.answerTitle {
+
+    font-size: 17px;
+
+    margin-top: 20px;
+
+    opacity: 0.8;
+}
+
+#answers {
+
+    display: flex;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    margin: 15px auto 25px;
+
+    max-width: 500px;
+}
+
+.answer {
+
+    width: 85px;
+
+    height: 70px;
+
+    border: none;
+
+    border-radius: 15px;
+
+    background: #70548a;
+
+    color: white;
+
+    font-size: 36px;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.12s,
+        background 0.15s;
+}
+
+.answer:hover {
+
+    transform: scale(1.06);
+}
+
+#start {
+
+    border: none;
+
+    border-radius: 12px;
+
+    padding: 13px 25px;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    background: white;
+
+    color: #171b38;
+}
+
+button:disabled {
+
+    opacity: 0.5;
+
+    cursor: not-allowed;
+}
+
+.info {
+
+    font-size: 13px;
+
+    opacity: 0.65;
+
+    margin-top: 15px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <h1>🔍 Pattern Detective</h1>
+
+    <div class="subtitle">
+        Find the missing piece in the pattern!
+    </div>
+
+
+    <div class="stats">
+
+        <div class="stat">
+            Round
+            <b id="round">0/10</b>
+        </div>
+
+        <div class="stat">
+            Score
+            <b id="score">0</b>
+        </div>
+
+        <div class="stat">
+            Lives
+            <b id="lives">❤️❤️❤️</b>
+        </div>
+
+    </div>
+
+
+    <div id="message">
+        Press Start to begin!
+    </div>
+
+
+    <div id="pattern"></div>
+
+
+    <div class="answerTitle">
+        What comes next?
+    </div>
+
+
+    <div id="answers"></div>
+
+
+    <button id="start">
+        Start Game
+    </button>
+
+
+    <div class="info">
+        This game focuses on pattern recognition and logical thinking.
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   ELEMENTS
+========================= */
+
+const patternDisplay =
+    document.getElementById("pattern");
+
+const answersDisplay =
+    document.getElementById("answers");
+
+const message =
+    document.getElementById("message");
+
+const roundDisplay =
+    document.getElementById("round");
+
+const scoreDisplay =
+    document.getElementById("score");
+
+const livesDisplay =
+    document.getElementById("lives");
+
+const startButton =
+    document.getElementById("start");
+
+
+/* =========================
+   GAME VARIABLES
+========================= */
+
+let round = 0;
+
+let score = 0;
+
+let lives = 3;
+
+let correctAnswer = "";
+
+let playing = false;
+
+
+/* =========================
+   SHAPES
+========================= */
+
+const shapes = [
+    "🔵",
+    "🔴",
+    "🟢",
+    "🟡",
+    "🟣",
+    "🟠"
+];
+
+
+/* =========================
+   START GAME
+========================= */
+
+function startGame() {
+
+    round = 1;
+
+    score = 0;
+
+    lives = 3;
+
+    playing = true;
+
+    scoreDisplay.textContent =
+        "0";
+
+    livesDisplay.textContent =
+        "❤️❤️❤️";
+
+    roundDisplay.textContent =
+        "1/10";
+
+    startButton.disabled = true;
+
+    startButton.textContent =
+        "Playing...";
+
+    message.textContent =
+        "🔍 Find the pattern!";
+
+    newRound();
+}
+
+
+/* =========================
+   CREATE ROUND
+========================= */
+
+function newRound() {
+
+    if (!playing) {
+        return;
+    }
+
+
+    patternDisplay.innerHTML = "";
+
+    answersDisplay.innerHTML = "";
+
+
+    /*
+       Choose a pattern type.
+
+       Early rounds:
+       simple repeating patterns.
+
+       Later rounds:
+       more complicated patterns.
+    */
+
+    let patternType =
+        Math.floor(
+            Math.random() *
+            (round >= 6 ? 4 : 2)
+        );
+
+
+    let sequence = [];
+
+    let answer;
+
+
+    /* =====================
+       TYPE 1
+       A B A B
+    ===================== */
+
+    if (patternType === 0) {
+
+        const a =
+            shapes[
+                Math.floor(
+                    Math.random() * shapes.length
+                )
+            ];
+
+        let b =
+            shapes[
+                Math.floor(
+                    Math.random() * shapes.length
+                )
+            ];
+
+        while (b === a) {
+
+            b =
+                shapes[
+                    Math.floor(
+                        Math.random() * shapes.length
+                    )
+                ];
+        }
+
+
+        sequence = [
+            a,
+            b,
+            a,
+            b,
+            a
+        ];
+
+        answer = b;
+    }
+
+
+    /* =====================
+       TYPE 2
+       A B C A B C
+    ===================== */
+
+    else if (patternType === 1) {
+
+        let chosen = [];
+
+
+        while (chosen.length < 3) {
+
+            let shape =
+                shapes[
+                    Math.floor(
+                        Math.random() * shapes.length
+                    )
+                ];
+
+
+            if (!chosen.includes(shape)) {
+
+                chosen.push(shape);
+            }
+        }
+
+
+        sequence = [
+            chosen[0],
+            chosen[1],
+            chosen[2],
+            chosen[0],
+            chosen[1]
+        ];
+
+        answer = chosen[2];
+    }
+
+
+    /* =====================
+       TYPE 3
+       A A B A A B
+    ===================== */
+
+    else if (patternType === 2) {
+
+        let a =
+            shapes[
+                Math.floor(
+                    Math.random() * shapes.length
+                )
+            ];
+
+        let b =
+            shapes[
+                Math.floor(
+                    Math.random() * shapes.length
+                )
+            ];
+
+        while (b === a) {
+
+            b =
+                shapes[
+                    Math.floor(
+                        Math.random() * shapes.length
+                    )
+                ];
+        }
+
+
+        sequence = [
+            a,
+            a,
+            b,
+            a,
+            a
+        ];
+
+        answer = b;
+    }
+
+
+    /* =====================
+       TYPE 4
+       A B C D A B C
+    ===================== */
+
+    else {
+
+        let chosen = [];
+
+
+        while (chosen.length < 4) {
+
+            let shape =
+                shapes[
+                    Math.floor(
+                        Math.random() * shapes.length
+                    )
+                ];
+
+
+            if (!chosen.includes(shape)) {
+
+                chosen.push(shape);
+            }
+        }
+
+
+        sequence = [
+            chosen[0],
+            chosen[1],
+            chosen[2],
+            chosen[3],
+            chosen[0],
+            chosen[1],
+            chosen[2]
+        ];
+
+        answer = chosen[3];
+    }
+
+
+    correctAnswer = answer;
+
+
+    /*
+       Show the pattern.
+    */
+
+    sequence.forEach(function(shape) {
+
+        const element =
+            document.createElement("div");
+
+        element.className =
+            "shape";
+
+        element.textContent =
+            shape;
+
+        patternDisplay.appendChild(element);
+    });
+
+
+    /*
+       Create answer choices.
+
+       One is correct.
+       The others are random.
+    */
+
+    let options = [correctAnswer];
+
+
+    while (options.length < 4) {
+
+        let option =
+            shapes[
+                Math.floor(
+                    Math.random() * shapes.length
+                )
+            ];
+
+
+        if (!options.includes(option)) {
+
+            options.push(option);
+        }
+    }
+
+
+    /*
+       Shuffle choices.
+    */
+
+    options.sort(
+        () => Math.random() - 0.5
+    );
+
+
+    options.forEach(function(option) {
+
+        const button =
+            document.createElement("button");
+
+        button.className =
+            "answer";
+
+        button.textContent =
+            option;
+
+        button.onclick =
+            function() {
+
+                chooseAnswer(
+                    option
+                );
+
+            };
+
+        answersDisplay.appendChild(button);
+    });
+
+
+    message.textContent =
+        "🔍 What comes next?";
+}
+
+
+/* =========================
+   CHOOSE ANSWER
+========================= */
+
+function chooseAnswer(answer) {
+
+    if (!playing) {
+        return;
+    }
+
+
+    if (answer === correctAnswer) {
+
+        /*
+           More points at higher levels.
+        */
+
+        const points =
+            100 + (round * 25);
+
+
+        score += points;
+
+
+        scoreDisplay.textContent =
+            score;
+
+
+        message.textContent =
+            "🎉 Correct! +" +
+            points +
+            " points";
+
+
+        playing = false;
+
+
+        if (round >= 10) {
+
+            setTimeout(
+                finishGame,
+                900
+            );
+
+        }
+
+        else {
+
+            setTimeout(
+                nextRound,
+                900
+            );
+        }
+
+    }
+
+    else {
+
+        loseLife();
+    }
+}
+
+
+/* =========================
+   WRONG ANSWER
+========================= */
+
+function loseLife() {
+
+    lives--;
+
+
+    livesDisplay.textContent =
+        "❤️".repeat(lives) +
+        "🖤".repeat(3 - lives);
+
+
+    if (lives <= 0) {
+
+        playing = false;
+
+
+        message.textContent =
+            "💥 Game over!";
+
+
+        setTimeout(
+            finishGame,
+            900
+        );
+
+
+        return;
+    }
+
+
+    message.textContent =
+        "❌ Not quite! Try again.";
+
+}
+
+
+/* =========================
+   NEXT ROUND
+========================= */
+
+function nextRound() {
+
+    round++;
+
+
+    roundDisplay.textContent =
+        round + "/10";
+
+
+    playing = true;
+
+
+    newRound();
+}
+
+
+/* =========================
+   FINISH GAME
+========================= */
+
+function finishGame() {
+
+    playing = false;
+
+
+    patternDisplay.innerHTML = "";
+
+    answersDisplay.innerHTML = "";
+
+
+    message.textContent =
+        "🏆 Game complete! Final score: " +
+        score;
+
+
+    startButton.disabled = false;
+
+    startButton.textContent =
+        "Play Again";
+}
+
+
+/* =========================
+   START BUTTON
+========================= */
+
+startButton.onclick =
+    startGame;
+
+</script>
+
+</body>
+</html>
